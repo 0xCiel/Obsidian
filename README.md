@@ -863,7 +863,7 @@ Library:SetDPIScale(150) -- 150% scaling
 
 ```lua
 -- Create a basic window with common elements
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/Library.lua"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/0xCiel/Obsidian/refs/heads/main/Library.lua"))()
 
 local Window = Library:CreateWindow({
     Title = "My Script",
@@ -967,7 +967,7 @@ local MyColorPicker = ToggleWithKeybind:AddColorPicker("MyColorPicker", {
 ### Advanced Example with Tabboxes
 
 ```lua
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/Library.lua"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/0xCiel/Obsidian/refs/heads/main/Library.lua"))()
 
 local Window = Library:CreateWindow({
     Title = "Advanced Example",
