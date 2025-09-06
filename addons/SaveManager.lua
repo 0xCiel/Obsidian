@@ -1,4 +1,4 @@
-local cloneref = (cloneref or clonereference or function(instance: any) return instance end)
+local cloneref = (cloneref or clonereference or function(instance) return instance end)
 local httpService = cloneref(game:GetService("HttpService"))
 local isfolder, isfile, listfiles = isfolder, isfile, listfiles
 
@@ -388,7 +388,7 @@ local SaveManager = {} do
         return true, ""
     end
 
-    function SaveManager:GetPlayerAutoloadConfig(playerName)
+    function SaveManager:GetPlayerAutoloadConfig()
         SaveManager:CheckFolderTree()
 
         local playerAutoLoadPath = self.Folder .. "/settings/player_autoload.txt"
@@ -457,10 +457,11 @@ local SaveManager = {} do
         return true, ""
     end
 
-    function SaveManager:LoadPlayerAutoloadConfig(playerName)
+    function SaveManager:LoadPlayerAutoloadConfig()
         SaveManager:CheckFolderTree()
 
         local playerConfigs = self:GetPlayerAutoloadConfig()
+        local playerName = game.Players.LocalPlayer.Name
         local configName = playerConfigs[playerName]
 
         if configName then
