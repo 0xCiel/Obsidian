@@ -337,28 +337,42 @@ local SaveManager = {} do
         return "none"
     end
 
-    function SaveManager:LoadAutoloadConfig()
-        SaveManager:CheckFolderTree()
+  function SaveManager:LoadAutoloadConfig()
+    SaveManager:CheckFolderTree()
 
-        local autoLoadPath = self.Folder .. "/settings/autoload.txt"
-        if SaveManager:CheckSubFolder(true) then
-            autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
-        end
-
-        if isfile(autoLoadPath) then
-            local successRead, name = pcall(readfile, autoLoadPath)
-            if not successRead then
-                return self.Library:Notify("Failed to load autoload config: write file error")
-            end
-
-            local success, err = self:Load(name)
-            if not success then
-                return self.Library:Notify("Failed to load autoload config: " .. err)
-            end
-
-            self.Library:Notify(string.format("Auto loaded config %q", name))
+    local playerConfigs = self:GetPlayerAutoloadConfig()
+    local playerName = game.Players.LocalPlayer.Name
+    local playerConfigName = playerConfigs[playerName]
+    
+    if playerConfigName then
+        local success, err = self:Load(playerConfigName)
+        if success then
+            self.Library:Notify(string.format("Auto loaded player config %q", playerConfigName))
+            return
+        else
+            self.Library:Notify("Failed to load player autoload config: " .. err)
         end
     end
+
+    local autoLoadPath = self.Folder .. "/settings/autoload.txt"
+    if SaveManager:CheckSubFolder(true) then
+        autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
+    end
+
+    if isfile(autoLoadPath) then
+        local successRead, name = pcall(readfile, autoLoadPath)
+        if not successRead then
+            return self.Library:Notify("Failed to load autoload config: write file error")
+        end
+
+        local success, err = self:Load(name)
+        if not success then
+            return self.Library:Notify("Failed to load autoload config: " .. err)
+        end
+
+        self.Library:Notify(string.format("Auto loaded config %q", name))
+    end
+end
 
     function SaveManager:SaveAutoloadConfig(name)
         SaveManager:CheckFolderTree()
