@@ -3,8 +3,6 @@ local httpService = cloneref(game:GetService("HttpService"))
 local isfolder, isfile, listfiles = isfolder, isfile, listfiles
 
 if typeof(copyfunction) == "function" then
-    -- Fix is_____ functions for shitsploits, those functions should never error, only return a boolean.
-
     local
         isfolder_copy,
         isfile_copy,
@@ -110,12 +108,11 @@ local SaveManager = {} do
 
     function SaveManager:IgnoreThemeSettings()
         self:SetIgnoreIndexes({
-            "BackgroundColor", "MainColor", "AccentColor", "OutlineColor", "FontColor", "FontFace", -- themes
-            "ThemeManager_ThemeList", "ThemeManager_CustomThemeList", "ThemeManager_CustomThemeName", -- themes
+            "BackgroundColor", "MainColor", "AccentColor", "OutlineColor", "FontColor", "FontFace",
+            "ThemeManager_ThemeList", "ThemeManager_CustomThemeList", "ThemeManager_CustomThemeName",
         })
     end
 
-    --// Folders \\--
     function SaveManager:CheckSubFolder(createFolder)
         if typeof(self.SubFolder) ~= "string" or self.SubFolder == "" then return false end
 
@@ -187,7 +184,6 @@ local SaveManager = {} do
         self:BuildFolderTree()
     end
 
-    --// Save, Load, Delete, Refresh \\--
     function SaveManager:Save(name)
         if (not name) then
             return false, "no config file is selected"
@@ -248,7 +244,7 @@ local SaveManager = {} do
             if not option.type then continue end
             if not self.Parser[option.type] then continue end
 
-            task.spawn(self.Parser[option.type].Load, option.idx, option) -- task.spawn() so the config loading wont get stuck.
+            task.spawn(self.Parser[option.type].Load, option.idx, option)
         end
 
         return true
@@ -289,8 +285,6 @@ local SaveManager = {} do
             for i = 1, #list do
                 local file = list[i]
                 if file:sub(-5) == ".json" then
-                    -- i hate this but it has to be done ...
-
                     local pos = file:find(".json", 1, true)
                     local start = pos
 
@@ -322,7 +316,6 @@ local SaveManager = {} do
         return data
     end
 
-    --// Auto Load \\--
     function SaveManager:GetAutoloadConfig()
         SaveManager:CheckFolderTree()
 
@@ -395,7 +388,91 @@ local SaveManager = {} do
         return true, ""
     end
 
-    --// GUI \\--
+    function SaveManager:GetPlayerAutoloadConfig(playerName)
+        SaveManager:CheckFolderTree()
+
+        local playerAutoLoadPath = self.Folder .. "/settings/player_autoload.txt"
+        if SaveManager:CheckSubFolder(true) then
+            playerAutoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/player_autoload.txt"
+        end
+
+        if isfile(playerAutoLoadPath) then
+            local successRead, data = pcall(readfile, playerAutoLoadPath)
+            if not successRead then
+                return {}
+            end
+
+            local successDecode, decoded = pcall(httpService.JSONDecode, httpService, data)
+            if not successDecode then
+                return {}
+            end
+
+            return decoded
+        end
+
+        return {}
+    end
+
+    function SaveManager:SavePlayerAutoloadConfig(playerName, configName)
+        SaveManager:CheckFolderTree()
+
+        local playerAutoLoadPath = self.Folder .. "/settings/player_autoload.txt"
+        if SaveManager:CheckSubFolder(true) then
+            playerAutoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/player_autoload.txt"
+        end
+
+        local playerConfigs = self:GetPlayerAutoloadConfig()
+        playerConfigs[playerName] = configName
+
+        local successEncode, encoded = pcall(httpService.JSONEncode, httpService, playerConfigs)
+        if not successEncode then
+            return false, "failed to encode data"
+        end
+
+        local success = pcall(writefile, playerAutoLoadPath, encoded)
+        if not success then return false, "write file error" end
+
+        return true, ""
+    end
+
+    function SaveManager:DeletePlayerAutoloadConfig(playerName)
+        SaveManager:CheckFolderTree()
+
+        local playerAutoLoadPath = self.Folder .. "/settings/player_autoload.txt"
+        if SaveManager:CheckSubFolder(true) then
+            playerAutoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/player_autoload.txt"
+        end
+
+        local playerConfigs = self:GetPlayerAutoloadConfig()
+        playerConfigs[playerName] = nil
+
+        local successEncode, encoded = pcall(httpService.JSONEncode, httpService, playerConfigs)
+        if not successEncode then
+            return false, "failed to encode data"
+        end
+
+        local success = pcall(writefile, playerAutoLoadPath, encoded)
+        if not success then return false, "write file error" end
+
+        return true, ""
+    end
+
+    function SaveManager:LoadPlayerAutoloadConfig(playerName)
+        SaveManager:CheckFolderTree()
+
+        local playerConfigs = self:GetPlayerAutoloadConfig()
+        local configName = playerConfigs[playerName]
+
+        if configName then
+            local success, err = self:Load(configName)
+            if not success then
+                return self.Library:Notify("Failed to load player config: " .. err)
+            end
+
+            self.Library:Notify(string.format("Auto loaded config %q for player %q", configName, playerName))
+        end
+    end
+
     function SaveManager:BuildConfigSection(tab)
         assert(self.Library, "Must set SaveManager.Library")
 
@@ -483,9 +560,38 @@ local SaveManager = {} do
             SaveManager.AutoloadLabel:SetText("Current autoload config: none")
         end)
 
+        section:AddButton("Auto Load Config To This Player", function()
+            local name = self.Library.Options.SaveManager_ConfigList.Value
+            local playerName = game.Players.LocalPlayer.Name
+
+            local success, err = self:SavePlayerAutoloadConfig(playerName, name)
+            if not success then
+                return self.Library:Notify("Failed to set player autoload config: " .. err)
+            end
+
+            SaveManager.PlayerAutoloadLabel:SetText("Player autoload: " .. name)
+            self.Library:Notify(string.format("Set %q to auto load for player %q", name, playerName))
+        end)
+
+        section:AddButton("Reset Player Autoload", function()
+            local playerName = game.Players.LocalPlayer.Name
+
+            local success, err = self:DeletePlayerAutoloadConfig(playerName)
+            if not success then
+                return self.Library:Notify("Failed to reset player autoload config: " .. err)
+            end
+
+            self.Library:Notify("Reset player autoload config")
+            SaveManager.PlayerAutoloadLabel:SetText("Player autoload: none")
+        end)
+
         self.AutoloadLabel = section:AddLabel("Current autoload config: " .. self:GetAutoloadConfig(), true)
 
-        -- self:LoadAutoloadConfig()
+        local playerConfigs = self:GetPlayerAutoloadConfig()
+        local playerName = game.Players.LocalPlayer.Name
+        local playerConfig = playerConfigs[playerName] or "none"
+        self.PlayerAutoloadLabel = section:AddLabel("Player autoload: " .. playerConfig, true)
+
         self:SetIgnoreIndexes({ "SaveManager_ConfigList", "SaveManager_ConfigName" })
     end
 
