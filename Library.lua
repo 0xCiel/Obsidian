@@ -1500,7 +1500,7 @@ do
     local WatermarkLabel = New("TextLabel", {
         BackgroundTransparency = 1,
         Size = UDim2.new(1, 0, 0, 32),
-        Position = UDim2.new(0.5, 0, 0, -8 * Library.DPIScale + 7)
+        Position = UDim2.new(0.5, 0, 0, -8 * Library.DPIScale + 7),
         Text = "",
         TextSize = 15,
         TextXAlignment = Enum.TextXAlignment.Left,
