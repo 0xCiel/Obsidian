@@ -1476,7 +1476,7 @@ end
 --// Watermark \\--
 do
     local WatermarkBackground = Library:MakeOutline(ScreenGui, Library.CornerRadius, 10)
-    WatermarkBackground.AutomaticSize = Enum.AutomaticSize.Y
+    WatermarkBackground.AutomaticSize = Enum.AutomaticSize.None
     WatermarkBackground.Position = UDim2.fromOffset(6, 6)
     WatermarkBackground.Size = UDim2.fromOffset(0, 0)
     WatermarkBackground.Visible = false
@@ -1499,11 +1499,13 @@ do
 
     local WatermarkLabel = New("TextLabel", {
         BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 0, 32),
-        Position = UDim2.new(0.5, 0, 0, -8 * Library.DPIScale + 7),
+        Size = UDim2.new(1, 0, 1, 0),
         Text = "",
         TextSize = 15,
+        TextColor3 = "TextColor",
+        Font = Library.Scheme.Font,
         TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Center,
         Parent = Holder,
     })
     New("UIPadding", {
@@ -1519,10 +1521,9 @@ do
         local TextWidth = X + 24
         local TextHeight = Y + 16
         
-        WatermarkBackground.Size = UDim2.fromOffset(TextWidth * Library.DPIScale, TextHeight * Library.DPIScale)
-        Library:UpdateDPI(WatermarkBackground, {
-            Size = UDim2.fromOffset(TextWidth, TextHeight),
-        })
+        WatermarkBackground.Size = UDim2.fromOffset(TextWidth, TextHeight)
+        Holder.Size = UDim2.new(1, -4, 1, -4)
+        WatermarkLabel.Size = UDim2.new(1, 0, 1, 0)
     end
 
     function Library:SetWatermarkVisibility(Visible: boolean)
