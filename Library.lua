@@ -1516,9 +1516,12 @@ do
 
     local function ResizeWatermark()
         local X, Y = Library:GetTextBounds(WatermarkLabel.Text, Library.Scheme.Font, 15)
-        WatermarkBackground.Size = UDim2.fromOffset((12 + X + 12 + 4) * Library.DPIScale, Y * Library.DPIScale * 2 + 4)
+        local TextWidth = X + 24
+        local TextHeight = Y + 16
+        
+        WatermarkBackground.Size = UDim2.fromOffset(TextWidth * Library.DPIScale, TextHeight * Library.DPIScale)
         Library:UpdateDPI(WatermarkBackground, {
-            Size = UDim2.fromOffset(12 + X + 12 + 4, Y * 2 + 4),
+            Size = UDim2.fromOffset(TextWidth, TextHeight),
         })
     end
 
@@ -1534,7 +1537,6 @@ do
         ResizeWatermark()
     end
 end
-
 --// Context Menu \\--
 local CurrentMenu
 function Library:AddContextMenu(
