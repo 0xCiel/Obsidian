@@ -341,7 +341,7 @@ local SaveManager = {} do
     SaveManager:CheckFolderTree()
 
     local playerConfigs = self:GetPlayerAutoloadConfig()
-    local playerName = game.Players.LocalPlayer.Name
+    local playerName = game:GetService("Players").LocalPlayer.Name
     local playerConfigName = playerConfigs[playerName]
     
     if playerConfigName then
@@ -475,7 +475,7 @@ end
         SaveManager:CheckFolderTree()
 
         local playerConfigs = self:GetPlayerAutoloadConfig()
-        local playerName = game.Players.LocalPlayer.Name
+        local playerName = game:GetService("Players").LocalPlayer.Name
         local configName = playerConfigs[playerName]
 
         if configName then
@@ -577,7 +577,7 @@ end
 
         section:AddButton("Auto Load Config To This Player", function()
             local name = self.Library.Options.SaveManager_ConfigList.Value
-            local playerName = game.Players.LocalPlayer.Name
+            local playerName = game:GetService("Players").LocalPlayer.Name
 
             local success, err = self:SavePlayerAutoloadConfig(playerName, name)
             if not success then
@@ -589,7 +589,7 @@ end
         end)
 
         section:AddButton("Reset Player Autoload", function()
-            local playerName = game.Players.LocalPlayer.Name
+            local playerName = game:GetService("Players").LocalPlayer.Name
 
             local success, err = self:DeletePlayerAutoloadConfig(playerName)
             if not success then
@@ -603,7 +603,7 @@ end
         self.AutoloadLabel = section:AddLabel("Current autoload config: " .. self:GetAutoloadConfig(), true)
 
         local playerConfigs = self:GetPlayerAutoloadConfig()
-        local playerName = game.Players.LocalPlayer.Name
+        local playerName = game:GetService("Players").LocalPlayer.Name
         local playerConfig = playerConfigs[playerName] or "none"
         self.PlayerAutoloadLabel = section:AddLabel("Player autoload: " .. playerConfig, true)
 
