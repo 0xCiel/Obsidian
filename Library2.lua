@@ -26,6 +26,14 @@ local Labels = {}
 local Buttons = {}
 local Toggles = {}
 local Options = {}
+local ProtectedTexts = {}
+
+function Library:ProtectText(instance, property, originalText)
+    if not ProtectedTexts[instance] then
+        ProtectedTexts[instance] = {}
+    end
+    ProtectedTexts[instance][property] = originalText
+end
 
 local Library = {
     LocalPlayer = LocalPlayer,
@@ -2624,6 +2632,7 @@ do
             Data.Size = Params.Size or 14
             Data.Visible = Params.Visible or true
             Data.Idx = typeof(Second) == "table" and First or nil
+            
         else
             Data.Text = First or ""
             Data.DoesWrap = Second or false
@@ -2652,7 +2661,7 @@ do
             TextXAlignment = Groupbox.IsKeyTab and Enum.TextXAlignment.Center or Enum.TextXAlignment.Left,
             Parent = Container,
         })
-
+        
         function Label:SetVisible(Visible: boolean)
             Label.Visible = Visible
 
@@ -2719,7 +2728,7 @@ do
         else
             table.insert(Labels, Label)
         end
-
+        Library:ProtectText(TextLabel, "Text", Label.Text)
         return Label
     end
 
@@ -2781,7 +2790,7 @@ do
             Tween = nil,
             Type = "Button",
         }
-
+        
         local Holder = New("Frame", {
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 0, 21),
@@ -2954,6 +2963,11 @@ do
                 table.insert(Buttons, SubButton)
             end
 
+
+            Library:ProtectText(Button.Base, "Text", Button.Text)
+            if Button.SubButton then
+                Library:ProtectText(Button.SubButton.Base, "Text", Button.SubButton.Text)
+            end
             return SubButton
         end
 
@@ -2993,6 +3007,7 @@ do
         function Button:SetText(Text: string)
             Button.Text = Text
             Button.Base.Text = Text
+            Library:ProtectText(Button.Base, "Text", Text)
         end
 
         if typeof(Button.Tooltip) == "string" or typeof(Button.DisabledTooltip) == "string" then
@@ -3213,7 +3228,8 @@ do
         table.insert(Groupbox.Elements, Toggle)
 
         Toggles[Idx] = Toggle
-
+        
+        Library:ProtectText(Label, "Text", Toggle.Text)
         return Toggle
     end
 
@@ -3433,7 +3449,8 @@ do
         table.insert(Groupbox.Elements, Toggle)
 
         Toggles[Idx] = Toggle
-
+        
+        Library:ProtectText(Label, "Text", Toggle.Text)
         return Toggle
     end
 
@@ -3592,7 +3609,7 @@ do
         table.insert(Groupbox.Elements, Input)
 
         Options[Idx] = Input
-
+        Library:ProtectText(Label, "Text", Input.Text)
         return Input
     end
 
@@ -3839,7 +3856,10 @@ do
         table.insert(Groupbox.Elements, Slider)
 
         Options[Idx] = Slider
-
+        if SliderLabel then
+            Library:ProtectText(SliderLabel, "Text", Slider.Text)
+        end
+        Library:ProtectText(DisplayLabel, "Text", DisplayLabel.Text)
         return Slider
     end
 
@@ -4284,7 +4304,10 @@ do
         table.insert(Groupbox.Elements, Dropdown)
 
         Options[Idx] = Dropdown
-
+        if Label then
+            Library:ProtectText(Label, "Text", Dropdown.Text or "")
+        end
+        Library:ProtectText(Display, "Text", Display.Text)
         return Dropdown
     end
 
@@ -5175,6 +5198,12 @@ function Library:Notify(...)
         end
     end)
 
+    if Title then
+        Library:ProtectText(Title, "Text", Data.Title)
+    end
+    if Desc then
+        Library:ProtectText(Desc, "Text", Data.Description)
+    end
     return Data
 end
 
@@ -6504,11 +6533,27 @@ local function OnTeamChange()
     end
 end
 
+Library:ProtectText(CurrentTabLabel, "Text", CurrentTabLabel.Text)
+Library:ProtectText(CurrentTabDescription, "Text", CurrentTabDescription.Text)
+
 Library:GiveSignal(Players.PlayerAdded:Connect(OnPlayerChange))
 Library:GiveSignal(Players.PlayerRemoving:Connect(OnPlayerChange))
 
 Library:GiveSignal(Teams.ChildAdded:Connect(OnTeamChange))
 Library:GiveSignal(Teams.ChildRemoved:Connect(OnTeamChange))
+Library:GiveSignal(RunService.Heartbeat:Connect(function()
+    for instance, properties in pairs(ProtectedTexts) do
+        if instance and instance.Parent then
+            for property, text in pairs(properties) do
+                if instance[property] ~= text then
+                    instance[property] = text
+                end
+            end
+        else
+            ProtectedTexts[instance] = nil
+        end
+    end
+end))
 
 getgenv().Library = Library
 return Library
