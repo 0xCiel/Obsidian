@@ -114,11 +114,17 @@ local ObsidianImageManager = {
     }
 }
 
+
 function Library:ProtectText(instance, property, originalText)
-    if not ProtectedTexts[instance] then
-        ProtectedTexts[instance] = {}
-    end
+    ProtectedTexts[instance] = ProtectedTexts[instance] or {}
     ProtectedTexts[instance][property] = originalText
+    instance[property] = originalText
+
+    instance:GetPropertyChangedSignal(property):Connect(function()
+        if instance[property] ~= originalText then
+            instance[property] = originalText
+        end
+    end)
 end
 
 do
@@ -6544,15 +6550,15 @@ Library:GiveSignal(Players.PlayerRemoving:Connect(OnPlayerChange))
 Library:GiveSignal(Teams.ChildAdded:Connect(OnTeamChange))
 Library:GiveSignal(Teams.ChildRemoved:Connect(OnTeamChange))
 Library:GiveSignal(RunService.Heartbeat:Connect(function()
-    for instance, properties in pairs(ProtectedTexts) do
-        if instance and instance.Parent then
-            for property, text in pairs(properties) do
-                if instance[property] ~= text then
-                    instance[property] = text
+    for inst, props in pairs(ProtectedTexts) do
+        if inst and inst.Parent then
+            for prop, val in pairs(props) do
+                if inst[prop] ~= val then
+                    inst[prop] = val
                 end
             end
         else
-            ProtectedTexts[instance] = nil
+            ProtectedTexts[inst] = nil
         end
     end
 end))
