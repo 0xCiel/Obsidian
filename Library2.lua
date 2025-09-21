@@ -5567,6 +5567,8 @@ function Library:CreateWindow(WindowInfo)
             PaddingTop = UDim.new(0, 0),
             Parent = Container,
         })
+        Library:ProtectText(CurrentTabLabel, "Text", CurrentTabLabel.Text)
+        Library:ProtectText(CurrentTabDescription, "Text", CurrentTabDescription.Text)
     end
 
     --// Window Table \\--
@@ -6535,8 +6537,6 @@ local function OnTeamChange()
     end
 end
 
-Library:ProtectText(CurrentTabLabel, "Text", CurrentTabLabel.Text)
-Library:ProtectText(CurrentTabDescription, "Text", CurrentTabDescription.Text)
 
 Library:GiveSignal(Players.PlayerAdded:Connect(OnPlayerChange))
 Library:GiveSignal(Players.PlayerRemoving:Connect(OnPlayerChange))
