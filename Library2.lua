@@ -28,12 +28,6 @@ local Toggles = {}
 local Options = {}
 local ProtectedTexts = {}
 
-function Library:ProtectText(instance, property, originalText)
-    if not ProtectedTexts[instance] then
-        ProtectedTexts[instance] = {}
-    end
-    ProtectedTexts[instance][property] = originalText
-end
 
 local Library = {
     LocalPlayer = LocalPlayer,
@@ -119,6 +113,14 @@ local ObsidianImageManager = {
         }
     }
 }
+
+function Library:ProtectText(instance, property, originalText)
+    if not ProtectedTexts[instance] then
+        ProtectedTexts[instance] = {}
+    end
+    ProtectedTexts[instance][property] = originalText
+end
+
 do
     local BaseURL = "https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/"
 
