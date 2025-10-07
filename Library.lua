@@ -5178,6 +5178,9 @@ function Library:Notify(...)
     return Data
 end
 
+
+
+
 function Library:CreateWindow(WindowInfo)
     WindowInfo = Library:Validate(WindowInfo, Templates.Window)
     local ViewportSize: Vector2 = workspace.CurrentCamera.ViewportSize
@@ -6511,4 +6514,84 @@ Library:GiveSignal(Teams.ChildAdded:Connect(OnTeamChange))
 Library:GiveSignal(Teams.ChildRemoved:Connect(OnTeamChange))
 
 getgenv().Library = Library
+
+local a1 = RunService
+
+local c8 = {}
+c8.__index = c8
+
+local z9 = {}
+local r5 = workspace.CurrentCamera.ViewportSize
+local p2 = 8
+local q7 = r5.Y - 100
+
+function c8.new(k3, j1, m6)
+    local s4 = setmetatable({}, c8)
+
+    s4.v1 = tostring(k3 or "")
+    s4.x2 = tonumber(j1 or 3)
+    s4.c3 = m6 or Color3.fromRGB(255, 255, 255)
+    s4.h7 = 22
+    s4.g6 = p2
+    s4.o9 = 0.02
+    s4.d8 = tick()
+
+    s4.u0 = Drawing.new("Text")
+    s4.u0.Text = s4.v1
+    s4.u0.Color = s4.c3
+    s4.u0.Size = s4.h7
+    s4.u0.Center = false
+    s4.u0.Outline = true
+    s4.u0.OutlineColor = Color3.fromRGB(0, 0, 0)
+    s4.u0.Visible = true
+    s4.u0.Transparency = 1
+
+    table.insert(z9, 1, s4)
+    s4:t2()
+
+    task.spawn(function()
+        task.wait(s4.x2)
+        s4:y9()
+    end)
+
+    return s4
+end
+
+function c8:t2()
+    for i, b4 in ipairs(z9) do
+        if b4.u0 then
+            local j9 = q7 - ((i - 1) * (b4.u0.TextBounds.Y + b4.g6))
+            b4.u0.Position = Vector2.new(r5.X - b4.u0.TextBounds.X - 40, j9)
+        end
+    end
+end
+
+function c8:y9()
+    for alpha = 1, 0, -self.o9 do
+        if not self.u0 then return end
+        self.u0.Transparency = alpha
+        a1.RenderStepped:Wait()
+    end
+    self:n7()
+end
+
+function c8:n7()
+    if self.u0 then
+        self.u0:Remove()
+        self.u0 = nil
+    end
+    for i, b4 in ipairs(z9) do
+        if b4 == self then
+            table.remove(z9, i)
+            break
+        end
+    end
+    for _, b4 in ipairs(z9) do
+        if b4.u0 then
+            b4:t2()
+        end
+    end
+end
+
+c8.new("THIS SCRIPT IS MADE BY CIEL IF YOU'VE BOUGHT THIS FROM OTHER PEOPLE YOU GOT SCAMMED, JOIN discord.gg/cielbasement this is real one", 60, Color3.fromRGB(0, 255, 128))
 return Library
