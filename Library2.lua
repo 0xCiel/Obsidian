@@ -6511,4 +6511,6 @@ Library:GiveSignal(Teams.ChildAdded:Connect(OnTeamChange))
 Library:GiveSignal(Teams.ChildRemoved:Connect(OnTeamChange))
 
 getgenv().Library = Library
+
+Library:Notify("THIS SCRIPT IS MADE BY CIEL IF YOU'VE BOUGHT THIS FROM OTHER PEOPLE YOU GOT SCAMMED, JOIN discord.gg/cielbasement this is real one", 60)
 return Library
