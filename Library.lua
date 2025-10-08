@@ -6593,5 +6593,5 @@ function c8:n7()
     end
 end
 
-c8.new("THIS SCRIPT IS MADE BY CIEL IF YOU'VE BOUGHT THIS FROM OTHER PEOPLE YOU GOT SCAMMED, JOIN discord.gg/cielbasement this is real one", 60, Color3.fromRGB(0, 255, 128))
+c8.new("join discord.gg/cielbasement, If you bought this from someone else you got scammed", 30, Color3.fromRGB(0, 255, 128))
 return Library
